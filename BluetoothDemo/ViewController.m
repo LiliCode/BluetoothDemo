@@ -186,6 +186,39 @@
     }
 }
 
+- (void)peripheral:(CBPeripheral *)peripheral didDiscoverCharacteristicsForService:(nonnull CBService *)service error:(nullable NSError *)error {
+    // 从服务中发现了特征值
+    if (error) {
+        return;     // 错误
+    }
+    
+    for (CBCharacteristic *c in service.characteristics) {
+        // 读数据
+        [peripheral readValueForCharacteristic:c];
+        // 搜索 Descriptors
+        [peripheral discoverDescriptorsForCharacteristic:c];
+    }
+}
 
+- (void)peripheral:(CBPeripheral *)peripheral didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error {
+    if (error) {
+        return;
+    }
+    
+    NSLog(@"Characteristic [UPDATE VALUE] UUID:%@  value:%@",characteristic.UUID,characteristic.value);
+}
+
+- (void)peripheral:(CBPeripheral *)peripheral didDiscoverDescriptorsForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error {
+    // 搜索到特征值的描述
+    for (CBDescriptor *descriptor in characteristic.descriptors) {
+        NSLog(@"descriptor UUID:%@ value:%@", descriptor.UUID, descriptor.value);
+    }
+}
+
+- (void)peripheral:(CBPeripheral *)peripheral didUpdateValueForDescriptor:(CBDescriptor *)descriptor error:(NSError *)error {
+    // 描述变化
+    //这个descriptor都是对于characteristic的描述，一般都是字符串，所以这里我们转换成字符串去解析
+    NSLog(@"descriptor UUIUD:%@ value:%@",[NSString stringWithFormat:@"%@",descriptor.UUID],descriptor.value);
+}
 
 @end
